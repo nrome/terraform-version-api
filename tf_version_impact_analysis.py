@@ -10,26 +10,22 @@ import platform
 
 
 # ------------------------------------------------------------------------------
-# Extract rc.type values from all policy files in /policies
+# Extract rc.type values from all files in /policies
 # ------------------------------------------------------------------------------
 def extract_rc_types_from_policies(policies_dir="policies"):
     results = []
 
-    if not os.path.isdir(policies_dir):
-        raise Exception(f"Directory not found: {policies_dir}")
-
     for root, _, files in os.walk(policies_dir):
         for file in files:
-            file_path = os.path.join(root, file)
+            path = os.path.join(root, file)
 
             try:
-                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                with open(path, "r", encoding="utf-8", errors="ignore") as f:
                     content = f.read()
             except Exception:
-                print(f"Warning: couldn't read file {file_path}")
+                print(f"Warning: couldn't read file {path}")
                 continue
 
-            # Regex: rc.type is "some_name"
             matches = re.findall(r'rc\.type\s+is\s+"([^"]+)"', content)
 
             for m in matches:
@@ -42,83 +38,70 @@ def extract_rc_types_from_policies(policies_dir="policies"):
 
 
 # ------------------------------------------------------------------------------
-# Load local Terraform Registry JSON
-# Expected format:
-#   { "resources": [ { "type": "azurerm_virtual_network", "title": "..." }, ... ] }
+# Load local AzureRM 4.53 resource list (JSON array of strings)
 # ------------------------------------------------------------------------------
-def load_local_registry(registry_path):
-    with open(registry_path, "r") as f:
-        return json.load(f)
+def load_local_resource_types(path):
+    with open(path, "r") as f:
+        data = json.load(f)
+
+    if not isinstance(data, list):
+        raise ValueError("Registry file must be a JSON array of strings")
+
+    return set(data)
 
 
 # ------------------------------------------------------------------------------
-# Compare rc.type to registry titles
+# Compare rc.type to AzureRM resource list
 # ------------------------------------------------------------------------------
-def compare_types(resource_entries, registry_data):
-
-    registry_map = {entry["type"]: entry["title"] for entry in registry_data.get("resources", [])}
-
+def compare_types(resource_entries, registry_set):
     results = []
 
     for entry in resource_entries:
         rtype = entry["resource_type"]
-        expected_title = registry_map.get(rtype)
-
-        mismatch = expected_title is None
+        match = rtype in registry_set
 
         results.append({
             "filename": entry["filename"],
             "resource_type": rtype,
-            "registry_title": expected_title if expected_title else "❌ No match",
-            "match": "Match" if not mismatch else "Mismatch"
+            "match": "Match" if match else "Mismatch"
         })
 
     return results
 
 
 # ------------------------------------------------------------------------------
-# Write Excel with color highlighting
+# Write color-highlighted Excel to temp directory + autolaunch
 # ------------------------------------------------------------------------------
 def write_excel(results):
-
-    df = pd.DataFrame(results)
-    df = df.sort_values(["filename", "resource_type"])
+    df = pd.DataFrame(results).sort_values(["filename", "resource_type"])
 
     temp_dir = tempfile.gettempdir()
-    excel_path = os.path.join(temp_dir, "terraform_policy_type_comparison.xlsx")
+    excel_path = os.path.join(temp_dir, "terraform_policy_rc_type_comparison.xlsx")
 
-    # Write the base file
     df.to_excel(excel_path, index=False)
 
-    # Apply color highlighting
     wb = openpyxl.load_workbook(excel_path)
     ws = wb.active
 
-    red_fill = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
-    green_fill = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
+    green = PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid")
+    red = PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid")
 
     match_col = None
-    for idx, col in enumerate(ws[1], 1):
-        if col.value == "match":
+    for idx, cell in enumerate(ws[1], 1):
+        if cell.value == "match":
             match_col = idx
             break
 
-    if match_col:
-        for row in ws.iter_rows(min_row=2):
-            cell = row[match_col - 1]
-
-            if cell.value == "Match":
-                for c in row:
-                    c.fill = green_fill
-            else:
-                for c in row:
-                    c.fill = red_fill
+    for row in ws.iter_rows(min_row=2):
+        fill = green if row[match_col - 1].value == "Match" else red
+        for c in row:
+            c.fill = fill
 
     wb.save(excel_path)
 
-    # Auto-launch the file
-    system = platform.system()
+    # Auto-launch Excel
     try:
+        system = platform.system()
         if system == "Windows":
             os.startfile(excel_path)
         elif system == "Darwin":
@@ -126,14 +109,14 @@ def write_excel(results):
         else:
             subprocess.run(["xdg-open", excel_path])
     except Exception:
-        print(f"Excel created but could not auto-open: {excel_path}")
+        print("Excel created but could not auto-open.")
 
     print(f"\nExcel file created at: {excel_path}")
     return excel_path
 
 
 # ------------------------------------------------------------------------------
-# JSON export for API / CLI use
+# JSON export
 # ------------------------------------------------------------------------------
 def export_json(results):
     return json.dumps(results, indent=2)
@@ -143,14 +126,15 @@ def export_json(results):
 # MAIN
 # ------------------------------------------------------------------------------
 def main():
-    registry_path = "terraform_registry.json"  # Local registry file
+    policies_dir = "policies"
+    registry_file = "azurerm-4.53.0-resource-types.json"
 
-    resource_entries = extract_rc_types_from_policies("policies")
-    registry_data = load_local_registry(registry_path)
+    resource_entries = extract_rc_types_from_policies(policies_dir)
+    registry_set = load_local_resource_types(registry_file)
 
-    results = compare_types(resource_entries, registry_data)
+    results = compare_types(resource_entries, registry_set)
 
-    excel_path = write_excel(results)
+    write_excel(results)
 
     print("\nJSON Export:\n")
     print(export_json(results))
