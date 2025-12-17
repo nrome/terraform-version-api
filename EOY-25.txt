@@ -1,0 +1,43 @@
+Year-End Performance Summary | Senior Security Engineer
+Overview & Ownership
+At the beginning of the year, I assumed full ownership of the HashiCorp Sentinel program as the sole contributor during a period of increased demand and executive-level stakeholder visibility. I stabilized and scaled the program while positioning it for long-term sustainability and broader adoption across the organization.
+Leadership & Enablement
+
+
+Proactively onboarded and enabled multiple team members through on-demand workshops covering Policy-as-Code (PaC) standards, repository architecture, and delivery workflows.
+
+
+Served as the primary intake and triage point for Sentinel-related work, improving ticket quality, prioritization, and maturity while reducing friction between security, platform, and engineering teams.
+
+
+Acted as a trusted advisor to stakeholders by translating policy and control requirements into actionable engineering outcomes.
+
+
+Engineering & Innovation Impact
+
+
+Exemption Visibility & Governance: Designed and delivered a Python-based solution that extracts HashiCorp Sentinel exemption data into JSON and Excel formats, providing leadership and control owners with lifecycle visibility, decision support, and audit-ready reporting.
+
+
+Policy Gap Analysis & IP Creation: Developed an automated, ML-driven policy gap analysis framework using NLP techniques. The Automated Policy Similarity Matrix–Gap Analysis Framework for Cloud Security Controls was filed as a U.S. patent on 11/13/2025. Two production services now compare Sentinel policies against Azure Policy and live Azure tenant environments (CORP, CORP2, CORP3), materially improving control coverage assessment.
+
+
+Terraform Upgrade Risk Management: Built a Python automation that performs Terraform version upgrade impact analysis against existing Sentinel and OPA policies, enabling early detection of breaking resource changes and significantly reducing upgrade risk for engineering teams.
+
+
+Strategic Project Contributions
+
+
+Open Policy Agent (OPA) conversion and adoption initiative
+
+
+Azure service enablement for Anvilogic workloads
+
+
+Security enablement for Azure Data Explorer, Azure Functions, Image Creation/Batch workloads, and Azure AI Search services
+
+
+Forward-Looking Development
+I am actively investing in leadership development and continued education, including cloud fundamentals and security certifications (e.g., AZ-900), to further strengthen my ability to lead teams, influence strategy, and scale security outcomes across the enterprise.
+Executive Summary
+This year, I moved beyond individual contribution into de facto technical leadership—owning a critical security program, creating patent-pending innovation, enabling teams, and reducing organizational risk. I am prepared to formally step into a people and program leadership role to scale these outcomes further.
