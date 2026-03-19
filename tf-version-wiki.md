@@ -1,4 +1,4 @@
-# 🧩 Terraform AzureRM Versioned Schema Extraction Guide
+# 🧩 Terraform AzureRM Versioned Schema Extraction Guide (BASH)
 
 This guide walks through creating a **version-specific Terraform workspace** and exporting a **complete AzureRM provider schema** along with a **clean list of resource types**.
 
