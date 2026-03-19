@@ -123,16 +123,6 @@ jq -r '
 - Useful for:
   - Sentinel policies
   - Compliance checks
-  - Resource validation pipelines  
+  - Resource validation pipelines
+  - Diff multiple versions to track provider changes
 
----
-
-## 🧠 Optional Enhancements
-
-- Extract **data sources** similarly using `.data_source_schemas`
-- Convert JSON → CSV for reporting
-- Diff multiple versions to track provider changes
-
----
-
-Happy building! 🚀
