@@ -2,6 +2,7 @@
 *
 
 # Recognize specific extensions
+!.gitignore
 !.md
 !.json
 !.tf
