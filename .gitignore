@@ -1,0 +1,7 @@
+# Ignore everything
+*
+
+# Recognize specific extensions
+!.md
+!.json
+!.tf
